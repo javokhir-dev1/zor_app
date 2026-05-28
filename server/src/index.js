@@ -29,6 +29,10 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Yuklangan fayllarni serve qilish
+const path_uploads = require('path');
+app.use('/uploads', express.static(path_uploads.join(__dirname, '../uploads')));
+
 // Request logger (development uchun)
 if (env.nodeEnv === 'development') {
   app.use((req, res, next) => {

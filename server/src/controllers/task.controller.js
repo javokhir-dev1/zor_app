@@ -49,14 +49,13 @@ async function listTasks(req, res) {
 
 /**
  * POST /api/tasks/:id/submit
- * Topshiriqqa javob yuborish (proof)
- * Body: { proof: { text: "...", image_url: "..." } }
+ * Topshiriqqa javob yuborish (matn + rasmlar)
+ * multipart/form-data: text (string), images (files[])
  */
 async function submitTask(req, res) {
   try {
     const taskId = parseInt(req.params.id, 10);
     const userId = req.user.userId;
-    const { proof } = req.body;
 
     // Topshiriq borligini va faolligini tekshirish
     const task = await db('tasks').where('id', taskId).where('is_active', true).first();
@@ -83,13 +82,23 @@ async function submitTask(req, res) {
       });
     }
 
+    // Proof ma'lumotlarini yig'ish
+    const text = req.body.text || '';
+    const images = (req.files || []).map((f) => `/uploads/proofs/${f.filename}`);
+
+    if (!text && images.length === 0) {
+      return res.status(400).json({ error: 'Matn yoki kamida bitta rasm kerak.' });
+    }
+
+    const proof = { text, images };
+
     // Javobni saqlash
     const [userTask] = await db('user_tasks')
       .insert({
         user_id: userId,
         task_id: taskId,
         status: TASK_STATUS.SUBMITTED,
-        proof: proof ? JSON.stringify(proof) : null,
+        proof: JSON.stringify(proof),
       })
       .returning('*');
 

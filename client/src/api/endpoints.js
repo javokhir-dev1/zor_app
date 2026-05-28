@@ -14,7 +14,9 @@ export const userApi = {
 // Tasks
 export const taskApi = {
   list: () => apiClient.get('/tasks'),
-  submit: (taskId, proof) => apiClient.post(`/tasks/${taskId}/submit`, { proof }),
+  submit: (taskId, formData) => apiClient.post(`/tasks/${taskId}/submit`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
 };
 
 // Shows

@@ -81,12 +81,65 @@ const LivePlayer = ({ url, poster }) => {
   }, [initPlayer]);
 
   useEffect(() => {
+    const tg = window.Telegram?.WebApp;
+
+    // Telegram fullscreen events
+    const onTgFullscreen = () => {
+      const isFull = !!tg?.isFullscreen;
+      setIsFullscreen(isFull);
+      setCssFullscreen(isFull); // Video wrapper ham kengayishi kerak
+    };
+    if (tg) {
+      tg.onEvent?.('fullscreenChanged', onTgFullscreen);
+      tg.onEvent?.('fullscreenFailed', () => {
+        // Telegram native failed — CSS fullscreen only
+        setCssFullscreen(true);
+        setIsFullscreen(true);
+      });
+    }
+
+    // Browser fullscreen events
     const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
+      const isFull = !!document.fullscreenElement;
+      setIsFullscreen(isFull);
+      if (!isFull) setCssFullscreen(false);
     };
     document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      if (tg) {
+        tg.offEvent?.('fullscreenChanged', onTgFullscreen);
+      }
+    };
   }, []);
+
+  const [cssFullscreen, setCssFullscreen] = useState(false);
+
+  const toggleFullscreen = (e) => {
+    e.stopPropagation();
+    const tg = window.Telegram?.WebApp;
+
+    if (isFullscreen) {
+      // Exit fullscreen
+      setCssFullscreen(false);
+      setIsFullscreen(false);
+      if (tg?.exitFullscreen) {
+        tg.exitFullscreen();
+      } else {
+        document.exitFullscreen?.().catch(() => {});
+      }
+    } else {
+      // Enter fullscreen — CSS always applies, + Telegram/Browser API if available
+      setCssFullscreen(true);
+      setIsFullscreen(true);
+      if (tg?.requestFullscreen) {
+        tg.requestFullscreen();
+      } else if (wrapperRef.current?.requestFullscreen) {
+        wrapperRef.current.requestFullscreen().catch(() => {});
+      }
+    }
+  };
 
   const handleRetry = () => initPlayer();
 
@@ -108,16 +161,6 @@ const LivePlayer = ({ url, poster }) => {
     video.muted = !video.muted;
   };
 
-  const toggleFullscreen = (e) => {
-    e.stopPropagation();
-    if (!wrapperRef.current) return;
-    if (!document.fullscreenElement) {
-      wrapperRef.current.requestFullscreen().catch(()=>{});
-    } else {
-      document.exitFullscreen().catch(()=>{});
-    }
-  };
-
   const handleMouseMove = () => {
     setShowControls(true);
     if (hideControlsTimeout.current) clearTimeout(hideControlsTimeout.current);
@@ -126,10 +169,21 @@ const LivePlayer = ({ url, poster }) => {
     }, 3000);
   };
 
+  const wrapperStyle = cssFullscreen ? {
+    ...styles.wrapper,
+    position: 'fixed',
+    inset: 0,
+    zIndex: 99999,
+    borderRadius: 0,
+    aspectRatio: 'unset',
+    width: '100vw',
+    height: '100vh',
+  } : styles.wrapper;
+
   return (
     <div 
       ref={wrapperRef}
-      style={styles.wrapper} 
+      style={wrapperStyle} 
       onMouseMove={handleMouseMove}
       onClick={handleMouseMove}
       onMouseLeave={() => playing && setShowControls(false)}
