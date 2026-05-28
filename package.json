@@ -1,0 +1,23 @@
+{
+  "name": "zor-tv-fan-club",
+  "version": "1.0.0",
+  "description": "Zo'r TV Fan Club — Telegram Bot + Web App",
+  "private": true,
+  "workspaces": [
+    "shared",
+    "bot",
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "bot": "npm run dev --workspace=bot",
+    "server": "npm run dev --workspace=server",
+    "client": "npm run dev --workspace=client",
+    "migrate": "npm run migrate --workspace=server",
+    "migrate:rollback": "npm run migrate:rollback --workspace=server",
+    "seed": "npm run seed --workspace=server"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

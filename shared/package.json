@@ -1,0 +1,6 @@
+{
+  "name": "shared",
+  "version": "1.0.0",
+  "description": "Shared constants and validators for Zo'r TV Fan Club",
+  "main": "index.js"
+}
