@@ -102,6 +102,7 @@ function validateInitData(initDataString, botToken) {
   }
 
   params.delete('hash');
+  params.delete('signature');
 
   // Parametrlarni alifbo tartibida saralash
   const dataCheckString = [...params.entries()]
