@@ -32,7 +32,7 @@ async function handleExportUsers(ctx) {
   await ctx.answerCbQuery('⏳ Excel tayyorlanmoqda...');
 
   try {
-    const users = await db('users').orderBy('created_at', 'asc');
+    const users = await db('users').orderBy('registered_at', 'asc');
 
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet('Foydalanuvchilar');
@@ -68,7 +68,7 @@ async function handleExportUsers(ctx) {
         role: u.role,
         score: u.score,
         is_banned: u.is_banned ? 'Ha' : 'Yo\'q',
-        created_at: u.created_at ? new Date(u.created_at).toLocaleString('uz-UZ') : '—',
+        created_at: u.registered_at ? new Date(u.registered_at).toLocaleString('uz-UZ') : '—',
       });
     });
 
