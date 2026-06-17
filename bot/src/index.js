@@ -20,6 +20,7 @@ const env = require('./config/env');
 // Buyruqlar
 const startCommand = require('./commands/start');
 const helpCommand = require('./commands/help');
+const adminCommand = require('./commands/admin');
 
 // Handlerlar
 const contactHandler = require('./handlers/contact');
@@ -49,6 +50,7 @@ bot.catch((err, ctx) => {
 
 bot.command('start', startCommand);
 bot.command('help', helpCommand);
+bot.command('admin', adminCommand);
 
 // ==================== HANDLERLAR ====================
 
